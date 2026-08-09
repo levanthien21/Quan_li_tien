@@ -64,11 +64,50 @@ export function createBot() {
 
       // If allowedAdmins array has items and adderId is not in it
       if (allowedAdmins.length > 0 && !allowedAdmins.includes(adderId)) {
-        await ctx.reply('⛔ Bot này là bot dùng riêng (Private Bot). Bạn không có quyền sử dụng bot này. Bot sẽ tự động rời khỏi nhóm ngay bây giờ.');
-        await ctx.leaveChat();
+        await ctx.reply('⚠️ Cảm ơn bạn đã thêm bot vào nhóm. Bot hiện đang bị khóa. Quản trị viên vui lòng gõ lệnh `/activate <mật_khẩu>` để kích hoạt sử dụng.', { parse_mode: 'Markdown' });
       } else {
-        await ctx.reply('✅ Cảm ơn bạn đã thêm bot vào nhóm. Bot đã sẵn sàng hoạt động!');
+        await ctx.reply('✅ Cảm ơn bạn đã thêm bot vào nhóm. Bot hiện đang bị khóa. Bạn là Quản trị viên, vui lòng gõ lệnh `/activate <mật_khẩu>` để kích hoạt.', { parse_mode: 'Markdown' });
       }
+    }
+  });
+
+  // Activate Command
+  bot.command('activate', async (ctx) => {
+    if (!ctx.chat || (ctx.chat.type !== 'group' && ctx.chat.type !== 'supergroup')) {
+      return ctx.reply('❌ Lệnh này chỉ áp dụng trong Telegram Group.');
+    }
+
+    try {
+      // Must be a group admin to activate
+      const fromUser = ctx.from;
+      if (!fromUser) return;
+
+      const admins = await ctx.getChatAdministrators();
+      const isAdmin = admins.some((admin) => admin.user.id === fromUser.id);
+
+      if (!isAdmin) {
+        return ctx.reply('⛔ Chỉ Quản trị viên (Admin) của nhóm mới có quyền kích hoạt Bot.');
+      }
+
+      const text = ctx.message && 'text' in ctx.message ? (ctx.message as any).text : '';
+      const password = text.replace('/activate', '').trim();
+
+      if (!password) {
+        return ctx.reply('❌ Vui lòng nhập mật khẩu. Cú pháp: `/activate <mật_khẩu>`', { parse_mode: 'Markdown' });
+      }
+
+      const correctPassword = process.env.ADMIN_TELEGRAM_IDS || '';
+      
+      if (password === correctPassword) {
+        const groupId = BigInt(ctx.chat.id);
+        await groupRepo.activateGroup(groupId);
+        return ctx.reply('✅ Kích hoạt thành công! Bot đã sẵn sàng hoạt động trong nhóm này. Chúc bạn sử dụng hiệu quả.');
+      } else {
+        return ctx.reply('❌ Mật khẩu kích hoạt không chính xác. Vui lòng thử lại.');
+      }
+    } catch (error) {
+      console.error('Error activating group:', error);
+      return ctx.reply('❌ Có lỗi xảy ra trong quá trình kích hoạt.');
     }
   });
 
