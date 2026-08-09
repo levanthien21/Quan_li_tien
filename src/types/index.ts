@@ -23,7 +23,8 @@ export interface DepositInput {
   groupId: bigint;
   customerId: bigint;
   operatorId: bigint;
-  amountVnd: Decimal;
+  amount: Decimal;
+  currency: 'VND' | 'USDT';
   customFeePercent?: Decimal;
   customExchangeRate?: Decimal;
   telegramMessageId?: bigint;
@@ -57,7 +58,8 @@ export interface WithdrawInput {
   groupId: bigint;
   customerId: bigint;
   operatorId: bigint;
-  amountVnd: Decimal;
+  amount: Decimal;
+  currency: 'VND' | 'USDT';
   telegramMessageId?: bigint;
   note?: string;
 }

@@ -6,7 +6,7 @@ import { formatWithdrawResponse } from '../utils/formatter.js';
 import { getTargetCustomer } from '../utils/telegram-helpers.js';
 
 export function setupWithdrawCommand(bot: any, withdrawalService: WithdrawalService) {
-  bot.hears(/^\/\-\s*([\d,.]+)/, async (ctx: any) => {
+  bot.hears(/^\/\-\s*([\d,.]+)\s*(u|usd)?/i, async (ctx: any) => {
     try {
       if (!ctx.chat || (ctx.chat.type !== 'group' && ctx.chat.type !== 'supergroup')) {
         return ctx.reply('❌ Lệnh này chỉ áp dụng trong Telegram Group.');
@@ -17,9 +17,10 @@ export function setupWithdrawCommand(bot: any, withdrawalService: WithdrawalServ
 
       const rawAmountStr = match[1].replace(/,/g, '');
       const amountNum = parseFloat(rawAmountStr);
+      const isUsd = !!match[2];
 
       if (isNaN(amountNum) || amountNum <= 0) {
-        return ctx.reply('❌ Số tiền rút không hợp lệ. Ví dụ: `/-100000`');
+        return ctx.reply('❌ Số tiền rút không hợp lệ. Ví dụ: `/-100000` hoặc `/- 50u`');
       }
 
       const targetCustomer = getTargetCustomer(ctx);
@@ -29,13 +30,14 @@ export function setupWithdrawCommand(bot: any, withdrawalService: WithdrawalServ
 
       const groupId = BigInt(ctx.chat.id);
       const operatorId = BigInt(ctx.from!.id);
-      const amountVnd = new Decimal(rawAmountStr);
+      const amount = new Decimal(rawAmountStr);
 
       const result = await withdrawalService.processWithdrawal({
         groupId,
         customerId: targetCustomer.customerId,
         operatorId,
-        amountVnd,
+        amount,
+        currency: isUsd ? 'USDT' : 'VND',
         telegramMessageId: BigInt(ctx.message!.message_id),
       });
 

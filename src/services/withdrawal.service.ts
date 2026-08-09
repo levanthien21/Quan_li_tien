@@ -53,14 +53,17 @@ export class WithdrawalService {
   ) {}
 
   async processWithdrawal(input: WithdrawInput): Promise<WithdrawResult> {
-    const { groupId, customerId, operatorId, amountVnd, telegramMessageId, note } = input;
+    const { groupId, customerId, operatorId, amount, currency, telegramMessageId, note } = input;
 
-    if (amountVnd.lessThanOrEqualTo(0)) {
+    if (amount.lessThanOrEqualTo(0)) {
       throw new Error('Số tiền rút phải lớn hơn 0');
     }
 
     // 1. Resolve withdrawal exchange rate
     const withdrawalExchangeRate = await this.feeRateService.resolveWithdrawalExchangeRate(groupId);
+
+    // Convert input amount to VND if it was USD
+    const amountVnd = currency === 'USDT' ? amount.mul(withdrawalExchangeRate) : amount;
 
     // 2. Calculate withdrawal details via WithdrawalCalculationService
     const calcResult = this.calcService.calculateWithdrawal({

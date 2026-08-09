@@ -47,7 +47,7 @@ export class DepositService {
   ) {}
 
   async processDeposit(input: DepositInput): Promise<DepositResult> {
-    const { groupId, customerId, operatorId, amountVnd, telegramMessageId, note } = input;
+    const { groupId, customerId, operatorId, amount, currency, telegramMessageId, note } = input;
 
     // 1. Determine Fee %
     const feePercent =
@@ -60,6 +60,9 @@ export class DepositService {
       input.customExchangeRate !== undefined
         ? input.customExchangeRate
         : await this.feeRateService.resolveDepositExchangeRate(groupId);
+
+    // Convert input amount to VND if it was USD
+    const amountVnd = currency === 'USDT' ? amount.mul(exchangeRate) : amount;
 
     // 3. Financial calculations
     const feeAmountVnd = calculateFeeAmount(amountVnd, feePercent);
