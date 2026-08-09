@@ -11,6 +11,17 @@ async function main() {
     // Fetch bot info first to verify connection
     const botInfo = await bot.telegram.getMe();
     
+    // Set bot commands menu
+    await bot.telegram.setMyCommands([
+      { command: 'balance', description: '💎 Xem số dư hiện tại' },
+      { command: 'history', description: '📜 Xem 5 giao dịch gần nhất' },
+      { command: 'report', description: '📊 Báo cáo tổng quan' },
+      { command: 'setrate', description: '⚙️ Cài đặt tỷ giá chung (Admin)' },
+      { command: 'setfee', description: '⚙️ Cài đặt phí mặc định (Admin)' },
+      { command: 'reset', description: '🔄 Reset số dư (Admin)' },
+      { command: 'start', description: '🤖 Menu chính & Trợ giúp' }
+    ]);
+
     // Launch long polling without awaiting resolution (since bot.launch() blocks until bot.stop())
     bot.launch().catch((error) => {
       console.error('❌ Error during long polling:', error);
