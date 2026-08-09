@@ -46,32 +46,6 @@ export function createBot() {
   // Middlewares
   bot.use(ensureGroupAndUserContext);
 
-  // Security: Restrict who can add the bot to groups
-  const allowedAdminsStr = process.env.ADMIN_TELEGRAM_IDS || '';
-  const allowedAdmins = allowedAdminsStr.split(',').map((id: string) => id.trim()).filter((id: string) => id !== '');
-
-  bot.on('my_chat_member', async (ctx) => {
-    const newStatus = ctx.myChatMember.new_chat_member.status;
-    const oldStatus = ctx.myChatMember.old_chat_member.status;
-    const chatType = ctx.chat.type;
-
-    // Triggered when bot is added to a group or supergroup
-    if ((chatType === 'group' || chatType === 'supergroup') && 
-        (newStatus === 'member' || newStatus === 'administrator') && 
-        (oldStatus === 'left' || oldStatus === 'kicked')) {
-        
-      const adderId = ctx.from.id.toString();
-
-      // If allowedAdmins array has items and adderId is not in it
-      if (allowedAdmins.length > 0 && !allowedAdmins.includes(adderId)) {
-        await ctx.reply('⛔ Bot này là bot dùng riêng (Private Bot). Bạn không có quyền sử dụng bot này. Bot sẽ tự động rời khỏi nhóm ngay bây giờ.');
-        await ctx.leaveChat();
-      } else {
-        await ctx.reply('✅ Cảm ơn bạn đã thêm bot vào nhóm. Bot đã sẵn sàng hoạt động!');
-      }
-    }
-  });
-
   // Setup Commands
   setupStartCommand(bot);
   setupBalanceCommand(bot, balanceService, groupRepo);
