@@ -10,6 +10,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!botInstance) {
         console.log('Initializing new bot instance...');
         botInstance = createBot();
+        
+        // Cấu hình menu lệnh nhanh
+        botInstance.telegram.setMyCommands([
+          { command: 'balance', description: '💎 Xem số dư hiện tại' },
+          { command: 'history', description: '📜 Xem 5 giao dịch gần nhất' },
+          { command: 'report', description: '📊 Báo cáo tổng quan' },
+          { command: 'setrate', description: '⚙️ Cài đặt tỷ giá chung (Admin)' },
+          { command: 'setfee', description: '⚙️ Cài đặt phí mặc định (Admin)' },
+          { command: 'reset', description: '🔄 Reset số dư (Admin)' },
+          { command: 'start', description: '🤖 Menu chính & Trợ giúp' }
+        ]).catch(err => console.error('Error setting commands:', err));
       }
       
       // Process the webhook payload
