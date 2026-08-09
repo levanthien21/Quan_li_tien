@@ -38,12 +38,8 @@ export function setupStartCommand(bot: any) {
 `;
     msg += `⚙️ **CÀI ĐẶT & TỶ GIÁ:**
 `;
-    msg += `🔹 \`/setfee <percent>\` : Đặt phí nạp mặc định (%)
-`;
-    msg += `🔹 \`/setdepositrate <giá>\` : Đặt tỷ giá nạp
-`;
-    msg += `🔹 \`/setwithdrawrate <giá>\` : Đặt tỷ giá rút
-`;
+    msg += `🔹 \`/setfee <percent>\` : Đặt phí nạp mặc định (%)\n`;
+    msg += `🔹 \`/setrate <giá>\` : Đặt tỷ giá chung (nạp & rút)\n`;
     msg += `━━━━━━━━━━━━━━━━━━`;
 
     const keyboard = Markup.inlineKeyboard([

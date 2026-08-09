@@ -38,7 +38,7 @@ export function formatDepositResponse(params: {
   msg += `💵 Sau phí:\n${formatVndDisplay(netAmountVnd)} VND\n\n`;
   msg += `💱 Tỷ giá:\n${formatVndDisplay(exchangeRate)}\n\n`;
   msg += `🪙 Quy đổi:\n${formatUsdtDisplay(amountUsdt)} U\n\n`;
-  msg += `💎 Số dư hiện tại:\n${formatUsdtDisplay(currentBalanceUsdt)} U\n\n`;
+  msg += `💎 Số dư hiện tại:\n${formatUsdtDisplay(currentBalanceUsdt)} U | ${formatVndDisplay(currentBalanceUsdt.mul(exchangeRate))} VND\n\n`;
   msg += formatRecentTransactions(recentTransactions);
 
   return msg.trim();
@@ -70,7 +70,7 @@ export function formatWithdrawResponse(params: {
   msg += `📤 Đã rút:\n${formatVndDisplay(withdrawVnd)} VND\n\n`;
   msg += `💱 Tỷ giá:\n${formatVndDisplay(exchangeRate)}\n\n`;
   msg += `🪙 Tương đương:\n${formatUsdtDisplay(withdrawUsdt)} U\n\n`;
-  msg += `💎 Còn lại:\n${formatUsdtDisplay(remainingBalanceUsdt)} U\n\n`;
+  msg += `💎 Còn lại:\n${formatUsdtDisplay(remainingBalanceUsdt)} U | ${formatVndDisplay(remainingBalanceUsdt.mul(exchangeRate))} VND\n\n`;
   msg += formatRecentTransactions(recentTransactions);
 
   return msg.trim();
