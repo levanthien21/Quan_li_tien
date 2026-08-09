@@ -19,7 +19,7 @@ export function setupWithdrawCommand(bot: any, withdrawalService: WithdrawalServ
       const amountNum = parseFloat(rawAmountStr);
 
       if (isNaN(amountNum) || amountNum <= 0) {
-        return ctx.reply('❌ Số tiền rút không hợp lệ. Ví dụ: `/-1298`');
+        return ctx.reply('❌ Số tiền rút không hợp lệ. Ví dụ: `/-100000`');
       }
 
       const targetCustomer = getTargetCustomer(ctx);
@@ -29,22 +29,24 @@ export function setupWithdrawCommand(bot: any, withdrawalService: WithdrawalServ
 
       const groupId = BigInt(ctx.chat.id);
       const operatorId = BigInt(ctx.from!.id);
-      const amountUsdt = new Decimal(rawAmountStr);
+      const amountVnd = new Decimal(rawAmountStr);
 
       const result = await withdrawalService.processWithdrawal({
         groupId,
         customerId: targetCustomer.customerId,
         operatorId,
-        amountUsdt,
+        amountVnd,
         telegramMessageId: BigInt(ctx.message!.message_id),
       });
 
       const responseText = formatWithdrawResponse({
         customerName: result.customerName,
         previousBalanceUsdt: result.previousBalanceUsdt,
+        withdrawVnd: result.withdrawVnd,
         withdrawUsdt: result.withdrawUsdt,
+        exchangeRate: result.exchangeRate,
         remainingBalanceUsdt: result.remainingBalanceUsdt,
-        recentTransactions: result.recentTransactions, // Note: Need to update formatWithdrawResponse to handle this
+        recentTransactions: result.recentTransactions,
       });
 
       return ctx.reply(responseText);

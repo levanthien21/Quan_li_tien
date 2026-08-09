@@ -47,7 +47,9 @@ export function formatDepositResponse(params: {
 export function formatWithdrawResponse(params: {
   customerName: string;
   previousBalanceUsdt: Decimal;
+  withdrawVnd: Decimal;
   withdrawUsdt: Decimal;
+  exchangeRate: Decimal;
   remainingBalanceUsdt: Decimal;
   recentTransactions: Array<{
     type: string;
@@ -58,14 +60,16 @@ export function formatWithdrawResponse(params: {
     amountUsdt: Decimal;
   }>;
 }): string {
-  const { customerName, previousBalanceUsdt, withdrawUsdt, remainingBalanceUsdt, recentTransactions } = params;
+  const { customerName, previousBalanceUsdt, withdrawVnd, withdrawUsdt, exchangeRate, remainingBalanceUsdt, recentTransactions } = params;
 
   let msg = `━━━━━━━━━━━━━━━━━━\n`;
   msg += `📤 RÚT TIỀN THÀNH CÔNG\n`;
   msg += `━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `👤 Customer: ${customerName}\n\n`;
   msg += `💰 Số dư trước:\n${formatUsdtDisplay(previousBalanceUsdt)} U\n\n`;
-  msg += `📤 Đã rút:\n${formatUsdtDisplay(withdrawUsdt)} U\n\n`;
+  msg += `📤 Đã rút:\n${formatVndDisplay(withdrawVnd)} VND\n\n`;
+  msg += `💱 Tỷ giá:\n${formatVndDisplay(exchangeRate)}\n\n`;
+  msg += `🪙 Tương đương:\n${formatUsdtDisplay(withdrawUsdt)} U\n\n`;
   msg += `💎 Còn lại:\n${formatUsdtDisplay(remainingBalanceUsdt)} U\n\n`;
   msg += formatRecentTransactions(recentTransactions);
 
@@ -101,7 +105,7 @@ function formatRecentTransactions(
         const feeFactor = new Decimal(1).sub(tx.feePercent.div(100)).toFixed(2);
         msg += `📥 Nạp: ${formatVndDisplay(tx.amountVnd)} × ${feeFactor} / ${formatVndDisplay(tx.exchangeRate)} = +${formatUsdtDisplay(tx.amountUsdt)} U\n\n`;
       } else if (tx.type === 'WITHDRAWAL') {
-        msg += `📤 Rút: -${formatUsdtDisplay(tx.amountUsdt)} U\n\n`;
+        msg += `📤 Rút: ${formatVndDisplay(tx.amountVnd)} / ${formatVndDisplay(tx.exchangeRate)} = -${formatUsdtDisplay(tx.amountUsdt)} U\n\n`;
       } else if (tx.type === 'ADJUSTMENT') {
         const prefix = tx.amountUsdt.isNegative() ? '' : '+';
         msg += `🔄 Điều chỉnh: ${prefix}${formatUsdtDisplay(tx.amountUsdt)} U\n\n`;

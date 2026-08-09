@@ -10,6 +10,7 @@ export interface IWithdrawalRepository {
     customerId: bigint;
     operatorId: bigint;
     exchangeRate: Decimal;
+    amountVnd: Decimal;
     amountUsdt: Decimal;
     telegramMessageId?: bigint;
     note?: string;
@@ -52,45 +53,43 @@ export class WithdrawalService {
   ) {}
 
   async processWithdrawal(input: WithdrawInput): Promise<WithdrawResult> {
-    const { groupId, customerId, operatorId, amountUsdt, telegramMessageId, note } = input;
+    const { groupId, customerId, operatorId, amountVnd, telegramMessageId, note } = input;
 
-    if (amountUsdt.lessThanOrEqualTo(0)) {
+    if (amountVnd.lessThanOrEqualTo(0)) {
       throw new Error('Số tiền rút phải lớn hơn 0');
     }
 
-    // 1. Get current balance (atomic / transaction check)
-    const previousBalanceUsdt = await this.balanceService.getCustomerBalanceUsdt(groupId, customerId);
-
-    // 2. Case 6 check: Withdrawal > Balance -> Reject
-    if (amountUsdt.greaterThan(previousBalanceUsdt)) {
-      throw new InsufficientBalanceError(previousBalanceUsdt, amountUsdt);
-    }
-
-    // 3. Resolve withdrawal exchange rate
+    // 1. Resolve withdrawal exchange rate
     const withdrawalExchangeRate = await this.feeRateService.resolveWithdrawalExchangeRate(groupId);
 
-    // 4. Calculate withdrawal details via WithdrawalCalculationService
-    this.calcService.calculateWithdrawal({
-      amountUsdt,
+    // 2. Calculate withdrawal details via WithdrawalCalculationService
+    const calcResult = this.calcService.calculateWithdrawal({
+      amountVnd,
       withdrawalExchangeRate,
     });
+    
+    const amountUsdt = calcResult.amountUsdt;
 
-    // 5. Create transaction in DB
+    // 3. Get current balance (atomic / transaction check removed to allow negative balance)
+    const previousBalanceUsdt = await this.balanceService.getCustomerBalanceUsdt(groupId, customerId);
+
+    // 4. Create transaction in DB
     const createdTx = await this.withdrawalRepository.createWithdrawalTransaction({
       groupId,
       customerId,
       operatorId,
       exchangeRate: withdrawalExchangeRate,
+      amountVnd,
       amountUsdt,
       telegramMessageId,
       note,
     });
 
-    // 6. Customer display name & remaining balance
+    // 5. Customer display name & remaining balance
     const customerName = await this.withdrawalRepository.getCustomerName(customerId);
     const remainingBalanceUsdt = previousBalanceUsdt.sub(amountUsdt).toDecimalPlaces(6, Decimal.ROUND_HALF_UP);
 
-    // 7. Get top 5 recent transactions
+    // 6. Get top 5 recent transactions
     const recentTransactions = await this.withdrawalRepository.getRecentTransactions(groupId, customerId, 5);
 
     return {
@@ -99,7 +98,9 @@ export class WithdrawalService {
       customerId,
       customerName,
       previousBalanceUsdt,
+      withdrawVnd: amountVnd,
       withdrawUsdt: amountUsdt,
+      exchangeRate: withdrawalExchangeRate,
       remainingBalanceUsdt,
       recentTransactions,
     };

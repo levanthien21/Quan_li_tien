@@ -1,13 +1,13 @@
 import Decimal from 'decimal.js';
 
 export interface IWithdrawalCalcOptions {
-  amountUsdt: Decimal;
+  amountVnd: Decimal;
   withdrawalExchangeRate: Decimal;
 }
 
 export interface IWithdrawalCalcResult {
+  amountVnd: Decimal;
   amountUsdt: Decimal;
-  equivalentVnd?: Decimal;
 }
 
 /**
@@ -20,21 +20,21 @@ export class WithdrawalCalculationService {
    * Calculates withdrawal output details.
    */
   calculateWithdrawal(options: IWithdrawalCalcOptions): IWithdrawalCalcResult {
-    const { amountUsdt, withdrawalExchangeRate } = options;
+    const { amountVnd, withdrawalExchangeRate } = options;
 
-    if (amountUsdt.lessThanOrEqualTo(0)) {
-      throw new Error('Withdrawal amount must be greater than 0');
+    if (amountVnd.lessThanOrEqualTo(0)) {
+      throw new Error('Số tiền rút phải lớn hơn 0');
     }
 
-    // Currently direct USDT withdrawal calculation
-    let equivalentVnd: Decimal | undefined;
-    if (withdrawalExchangeRate.greaterThan(0)) {
-      equivalentVnd = amountUsdt.mul(withdrawalExchangeRate).toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
+    if (withdrawalExchangeRate.lessThanOrEqualTo(0)) {
+      throw new Error('Tỷ giá rút chưa được thiết lập');
     }
+
+    const amountUsdt = amountVnd.div(withdrawalExchangeRate).toDecimalPlaces(6, Decimal.ROUND_HALF_UP);
 
     return {
+      amountVnd,
       amountUsdt,
-      equivalentVnd,
     };
   }
 }

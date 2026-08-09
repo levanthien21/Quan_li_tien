@@ -85,6 +85,7 @@ export class TransactionRepository
     customerId: bigint;
     operatorId: bigint;
     exchangeRate: Decimal;
+    amountVnd: Decimal;
     amountUsdt: Decimal;
     telegramMessageId?: bigint;
     note?: string;
@@ -94,10 +95,10 @@ export class TransactionRepository
       customerId: txData.customerId,
       operatorId: txData.operatorId,
       type: 'WITHDRAWAL',
-      amountVnd: new Decimal(0),
+      amountVnd: txData.amountVnd,
       feePercent: new Decimal(0),
       feeAmountVnd: new Decimal(0),
-      netAmountVnd: new Decimal(0),
+      netAmountVnd: txData.amountVnd, // For withdrawal, net amount is just the withdrawal amount
       exchangeRate: txData.exchangeRate,
       amountUsdt: txData.amountUsdt,
       telegramMessageId: txData.telegramMessageId,

@@ -57,7 +57,7 @@ export interface WithdrawInput {
   groupId: bigint;
   customerId: bigint;
   operatorId: bigint;
-  amountUsdt: Decimal;
+  amountVnd: Decimal;
   telegramMessageId?: bigint;
   note?: string;
 }
@@ -68,7 +68,9 @@ export interface WithdrawResult {
   customerId: bigint;
   customerName: string;
   previousBalanceUsdt: Decimal;
+  withdrawVnd: Decimal;
   withdrawUsdt: Decimal;
+  exchangeRate: Decimal;
   remainingBalanceUsdt: Decimal;
   recentTransactions: Array<{
     id: string;
