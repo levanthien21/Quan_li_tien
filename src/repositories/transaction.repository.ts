@@ -258,4 +258,11 @@ export class TransactionRepository
       transactionCount,
     };
   }
+
+  async deleteAllTransactionsInGroup(groupId: bigint): Promise<number> {
+    const { count } = await prisma.transaction.deleteMany({
+      where: { groupId },
+    });
+    return count;
+  }
 }

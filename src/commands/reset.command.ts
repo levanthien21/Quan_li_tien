@@ -56,4 +56,24 @@ export function setupResetCommand(bot: any, transactionRepo: TransactionReposito
       return ctx.reply(`❌ Lỗi khi reset số dư: ${error.message || error}`);
     }
   });
+
+  bot.command(['reset2', 'resetall'], async (ctx: Context) => {
+    try {
+      if (!ctx.chat || (ctx.chat.type !== 'group' && ctx.chat.type !== 'supergroup')) {
+        return ctx.reply('❌ Lệnh này chỉ áp dụng trong Telegram Group.');
+      }
+
+      const groupId = BigInt(ctx.chat.id);
+      
+      const count = await transactionRepo.deleteAllTransactionsInGroup(groupId);
+
+      return ctx.reply(
+        `🧹 **LÀM MỚI DỮ LIỆU THÀNH CÔNG**\n━━━━━━━━━━━━━━━━━━\n✅ Đã xóa toàn bộ ${count} giao dịch trong nhóm này. Dữ liệu đã được reset về 0.`,
+        { parse_mode: 'Markdown' }
+      );
+    } catch (error: any) {
+      console.error('Error resetting all transactions:', error);
+      return ctx.reply(`❌ Lỗi khi làm mới dữ liệu: ${error.message || error}`);
+    }
+  });
 }

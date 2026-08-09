@@ -18,7 +18,8 @@ async function main() {
       { command: 'report', description: '📊 Báo cáo tổng quan' },
       { command: 'setrate', description: '⚙️ Cài đặt tỷ giá chung (Admin)' },
       { command: 'setfee', description: '⚙️ Cài đặt phí mặc định (Admin)' },
-      { command: 'reset', description: '🔄 Reset số dư (Admin)' },
+      { command: 'reset', description: '🔄 Reset số dư 1 khách (Admin)' },
+      { command: 'reset2', description: '🧹 Làm mới toàn bộ GD (Admin)' },
       { command: 'start', description: '🤖 Menu chính & Trợ giúp' }
     ]);
 

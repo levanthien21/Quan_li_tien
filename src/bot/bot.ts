@@ -53,7 +53,7 @@ export function createBot() {
   // Protected Operator Commands
   bot.use(async (ctx, next) => {
     const text = ctx.message && 'text' in ctx.message ? (ctx.message as any).text : '';
-    const protectedCommands = ['/reset', '/setfee', '/setrate', '/report'];
+    const protectedCommands = ['/reset', '/reset2', '/resetall', '/setfee', '/setrate', '/report'];
     
     // Check if it's a protected command or starts with + / - followed by number
     const isProtected = protectedCommands.some((cmd) => text.startsWith(cmd)) || /^\/[+-]\s*[\d,.]+/.test(text);
