@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: telegram_money_bot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  bot:
+    build: .
+    restart: always
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgrespassword@db:5432/telegram_money_bot?schema=public
+    command: sh -c "npx prisma db push && npm start"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
