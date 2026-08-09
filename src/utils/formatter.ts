@@ -29,13 +29,17 @@ export function formatDepositResponse(params: {
     recentTransactions,
   } = params;
 
+  const grossUsdt = amountVnd.div(exchangeRate);
+  const feeVnd = amountVnd.sub(netAmountVnd);
+  const feeUsdt = grossUsdt.sub(amountUsdt);
+
   let msg = `━━━━━━━━━━━━━━━━━━\n`;
   msg += `📥 NẠP TIỀN THÀNH CÔNG\n`;
   msg += `━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `👤 Customer: ${customerName}\n\n`;
-  msg += `💰 Nạp:\n${formatVndDisplay(amountVnd)} VND\n\n`;
-  msg += `💸 Phí:\n${feePercent.toFixed(2)}%\n\n`;
-  msg += `💵 Sau phí:\n${formatVndDisplay(netAmountVnd)} VND\n\n`;
+  msg += `💰 Nạp:\n${formatUsdtDisplay(grossUsdt)} U | ${formatVndDisplay(amountVnd)} VND\n\n`;
+  msg += `💸 Phí:\n${feePercent.toFixed(2)}% (~ ${formatUsdtDisplay(feeUsdt)} U | ${formatVndDisplay(feeVnd)} VND)\n\n`;
+  msg += `💵 Sau phí:\n${formatUsdtDisplay(amountUsdt)} U | ${formatVndDisplay(netAmountVnd)} VND\n\n`;
   msg += `💱 Tỷ giá:\n${formatVndDisplay(exchangeRate)}\n\n`;
   msg += `🪙 Quy đổi:\n${formatUsdtDisplay(amountUsdt)} U\n\n`;
   msg += `💎 Số dư hiện tại:\n${formatUsdtDisplay(currentBalanceUsdt)} U | ${formatVndDisplay(currentBalanceUsdt.mul(exchangeRate))} VND\n\n`;
@@ -94,6 +98,7 @@ function formatRecentTransactions(
   } else {
     recentTransactions.forEach((tx) => {
       const timeStr = tx.createdAt.toLocaleTimeString('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh',
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
