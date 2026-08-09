@@ -48,12 +48,12 @@ export function createBot() {
 
   // Setup Commands
   setupStartCommand(bot);
-  setupBalanceCommand(bot, balanceService);
+  setupBalanceCommand(bot, balanceService, groupRepo);
 
   // Protected Operator Commands
   bot.use(async (ctx, next) => {
     const text = ctx.message && 'text' in ctx.message ? (ctx.message as any).text : '';
-    const protectedCommands = ['/reset', '/setfee', '/setdepositrate', '/setwithdrawrate', '/report'];
+    const protectedCommands = ['/reset', '/setfee', '/setdepositrate', '/setwithdrawrate', '/setrate', '/report'];
     
     // Check if it's a protected command or starts with + / - followed by number
     const isProtected = protectedCommands.some((cmd) => text.startsWith(cmd)) || /^\/[+-]\s*[\d,.]+/.test(text);

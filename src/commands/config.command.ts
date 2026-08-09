@@ -55,6 +55,41 @@ export function setupConfigCommands(
     }
   });
 
+  // 1.5. /setrate <rate> - Cài tỷ giá dùng chung (cả nạp và rút)
+  bot.command('setrate', async (ctx: Context) => {
+    try {
+      if (!ctx.chat || (ctx.chat.type !== 'group' && ctx.chat.type !== 'supergroup')) {
+        return ctx.reply('❌ Lệnh này chỉ áp dụng trong Telegram Group.');
+      }
+
+      const text = 'text' in ctx.message! ? ctx.message.text : '';
+      const args = text.split(/\s+/).slice(1);
+
+      if (args.length === 0) {
+        return ctx.reply('⚠️ Cú pháp: `/setrate <tỷ_giá>`\nVí dụ: `/setrate 25000`', {
+          parse_mode: 'Markdown',
+        });
+      }
+
+      const rate = new Decimal(args[0].replace(/,/g, ''));
+      if (rate.lessThanOrEqualTo(0)) {
+        return ctx.reply('❌ Tỷ giá phải lớn hơn 0.');
+      }
+
+      const groupId = BigInt(ctx.chat.id);
+      await Promise.all([
+        groupRepo.updateDepositRate(groupId, rate),
+        groupRepo.updateWithdrawRate(groupId, rate),
+      ]);
+      return ctx.reply(`✅ Đã cập nhật tỷ giá chung: **${formatVndDisplay(rate)} VND/USDT**`, {
+        parse_mode: 'Markdown',
+      });
+    } catch (error: any) {
+      console.error('Error in setrate:', error);
+      return ctx.reply(`❌ Lỗi cài đặt tỷ giá chung: ${error.message || error}`);
+    }
+  });
+
   // 2. /setdepositrate <rate> - Cài tỷ giá nạp thủ công
   bot.command('setdepositrate', async (ctx: Context) => {
     try {

@@ -1,9 +1,10 @@
 import { Context } from 'telegraf';
 import { BalanceService } from '../services/balance.service.js';
+import { GroupRepository } from '../repositories/group.repository.js';
 import { getTargetCustomer } from '../utils/telegram-helpers.js';
-import { formatUsdtDisplay } from '../utils/decimal.js';
+import { formatUsdtDisplay, formatVndDisplay } from '../utils/decimal.js';
 
-export function setupBalanceCommand(bot: any, balanceService: BalanceService) {
+export function setupBalanceCommand(bot: any, balanceService: BalanceService, groupRepo: GroupRepository) {
   bot.command(['balance', 'sodu'], async (ctx: Context) => {
     try {
       if (!ctx.chat || (ctx.chat.type !== 'group' && ctx.chat.type !== 'supergroup')) {
@@ -17,10 +18,13 @@ export function setupBalanceCommand(bot: any, balanceService: BalanceService) {
 
       const groupId = BigInt(ctx.chat.id);
       const balanceUsdt = await balanceService.getCustomerBalanceUsdt(groupId, targetCustomer.customerId);
+      const exchangeRate = await groupRepo.getGroupDepositRate(groupId);
+      const balanceVnd = balanceUsdt.mul(exchangeRate);
 
       let msg = `💎 SỐ DƯ HIỆN TẠI\n\n`;
       msg += `👤 Customer: ${targetCustomer.customerName}\n`;
-      msg += `🪙 Số dư USDT: ${formatUsdtDisplay(balanceUsdt)} U`;
+      msg += `🪙 Số dư USDT: ${formatUsdtDisplay(balanceUsdt)} U\n`;
+      msg += `💵 Số dư VND: ${formatVndDisplay(balanceVnd)} VND`;
 
       return ctx.reply(msg);
     } catch (error: any) {
