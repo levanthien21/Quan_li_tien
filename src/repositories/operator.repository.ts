@@ -28,4 +28,15 @@ export class OperatorRepository {
     const op = await this.findByTelegramId(telegramId);
     return op !== null;
   }
+  async removeOperator(telegramId: bigint) {
+    return prisma.operator.deleteMany({
+      where: { telegramId },
+    });
+  }
+
+  async getAllOperators() {
+    return prisma.operator.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }
