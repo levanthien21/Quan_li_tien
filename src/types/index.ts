@@ -95,6 +95,7 @@ export interface GroupSummaryReport {
   totalNetDepositVnd: Decimal;
   totalDepositUsdt: Decimal;
   totalWithdrawalUsdt: Decimal;
+  totalWithdrawalVnd: Decimal;
   remainingBalanceUsdt: Decimal;
   customerCount: number;
   transactionCount: number;

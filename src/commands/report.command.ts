@@ -22,13 +22,16 @@ export function setupReportAndHistoryCommands(
       msg += `👥 Tổng số khách hàng: ${summary.customerCount}\n`;
       msg += `📝 Tổng số giao dịch: ${summary.transactionCount}\n\n`;
       msg += `⚙️ Phí nạp (Fee Rate): ${summary.depositFeeRate.toFixed(2)}%\n`;
-      msg += `💱 Tỷ giá Nạp (Deposit Rate): ${formatVndDisplay(summary.depositExchangeRate)}\n`;
-      msg += `💱 Tỷ giá Rút (Withdraw Rate): ${formatVndDisplay(summary.withdrawalExchangeRate)}\n\n`;
-      msg += `📥 Tổng tiền nạp (VND): ${formatVndDisplay(summary.totalDepositVnd)} VND\n`;
-      msg += `💵 Tổng thực nhận (VND): ${formatVndDisplay(summary.totalNetDepositVnd)} VND\n`;
-      msg += `🪙 Tổng nạp (USDT): ${formatUsdtDisplay(summary.totalDepositUsdt)} U\n`;
-      msg += `📤 Tổng đã rút (USDT): ${formatUsdtDisplay(summary.totalWithdrawalUsdt)} U\n\n`;
-      msg += `💎 DƯ NỢ CÒN LẠI (USDT): ${formatUsdtDisplay(summary.remainingBalanceUsdt)} U\n`;
+      msg += `💱 Tỷ giá hiện tại (Exchange Rate): ${formatVndDisplay(summary.depositExchangeRate)}\n\n`;
+      
+      const totalGrossDepositUsdt = summary.totalDepositVnd.div(summary.depositExchangeRate);
+      
+      msg += `📥 Tổng tiền nạp: ${formatUsdtDisplay(totalGrossDepositUsdt)} U | ${formatVndDisplay(summary.totalDepositVnd)} VND\n`;
+      msg += `💵 Tổng thực nhận sau phí: ${formatUsdtDisplay(summary.totalDepositUsdt)} U | ${formatVndDisplay(summary.totalNetDepositVnd)} VND\n`;
+      msg += `📤 Tổng đã rút: ${formatUsdtDisplay(summary.totalWithdrawalUsdt)} U | ${formatVndDisplay(summary.totalWithdrawalVnd)} VND\n\n`;
+      
+      const currentBalanceVnd = summary.remainingBalanceUsdt.mul(summary.depositExchangeRate);
+      msg += `💎 DƯ NỢ CÒN LẠI: ${formatUsdtDisplay(summary.remainingBalanceUsdt)} U | ${formatVndDisplay(currentBalanceVnd)} VND\n`;
       msg += `━━━━━━━━━━━━━━━━━━`;
 
       return ctx.reply(msg);

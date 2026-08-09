@@ -218,6 +218,7 @@ export class TransactionRepository
       }),
       prisma.transaction.aggregate({
         _sum: {
+          amountVnd: true,
           amountUsdt: true,
         },
         where: { groupId, type: 'WITHDRAWAL' },
@@ -236,6 +237,7 @@ export class TransactionRepository
     const totalNetDepositVnd = new Decimal(depositAgg._sum.netAmountVnd?.toString() || '0');
     const totalDepositUsdt = new Decimal(depositAgg._sum.amountUsdt?.toString() || '0');
     const totalWithdrawalUsdt = new Decimal(withdrawalAgg._sum.amountUsdt?.toString() || '0');
+    const totalWithdrawalVnd = new Decimal(withdrawalAgg._sum.amountVnd?.toString() || '0');
     const totalAdjustmentUsdt = new Decimal(adjustmentAgg._sum.amountUsdt?.toString() || '0');
 
     const remainingBalanceUsdt = totalDepositUsdt.sub(totalWithdrawalUsdt).add(totalAdjustmentUsdt);
@@ -250,6 +252,7 @@ export class TransactionRepository
       totalNetDepositVnd,
       totalDepositUsdt,
       totalWithdrawalUsdt,
+      totalWithdrawalVnd,
       remainingBalanceUsdt,
       customerCount,
       transactionCount,
