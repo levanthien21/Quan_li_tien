@@ -17,7 +17,6 @@ export class GroupRepository implements IFeeRateRepository {
         defaultFeePercent: 0,
         depositExchangeRate: 0,
         withdrawalExchangeRate: 0,
-        isActive: false,
       },
     });
   }
@@ -32,13 +31,6 @@ export class GroupRepository implements IFeeRateRepository {
     return prisma.telegramGroup.update({
       where: { id: groupId },
       data: { defaultFeePercent: feePercent.toString() },
-    });
-  }
-
-  async activateGroup(groupId: bigint) {
-    return prisma.telegramGroup.update({
-      where: { id: groupId },
-      data: { isActive: true },
     });
   }
 
