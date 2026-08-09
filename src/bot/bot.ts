@@ -20,7 +20,6 @@ import { setupBalanceCommand } from '../commands/balance.command.js';
 import { setupConfigCommands } from '../commands/config.command.js';
 import { setupReportAndHistoryCommands } from '../commands/report.command.js';
 import { setupResetCommand } from '../commands/reset.command.js';
-import { setupOperatorCommands } from '../commands/operator.command.js';
 
 dotenv.config();
 
@@ -50,7 +49,6 @@ export function createBot() {
   // Setup Commands
   setupStartCommand(bot);
   setupBalanceCommand(bot, balanceService);
-  setupOperatorCommands(bot);
 
   // Protected Operator Commands
   bot.use(async (ctx, next) => {

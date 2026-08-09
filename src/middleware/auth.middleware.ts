@@ -1,7 +1,4 @@
 import { Context, MiddlewareFn } from 'telegraf';
-import { OperatorRepository } from '../repositories/operator.repository.js';
-
-const operatorRepo = new OperatorRepository();
 
 export const requireOperator: MiddlewareFn<Context> = async (ctx, next) => {
   const fromUser = ctx.from;
@@ -9,16 +6,22 @@ export const requireOperator: MiddlewareFn<Context> = async (ctx, next) => {
     return ctx.reply('❌ Không thể xác minh danh tính người dùng.');
   }
 
-  try {
-    const isOp = await operatorRepo.isOperator(BigInt(fromUser.id));
+  // Allow in private chat (direct messages to bot)
+  if (!ctx.chat || ctx.chat.type === 'private') {
+    return next();
+  }
 
-    if (!isOp) {
-      return ctx.reply('⛔ Bot đang ở chế độ riêng tư. Bạn chưa được cấp phép sử dụng Bot này.');
+  try {
+    const admins = await ctx.getChatAdministrators();
+    const isAdmin = admins.some((admin) => admin.user.id === fromUser.id);
+
+    if (!isAdmin) {
+      return ctx.reply('⛔ Bạn không có quyền thực hiện thao tác này. Chỉ Quản trị viên (Admin) nhóm mới được phép.');
     }
 
     return next();
   } catch (error) {
-    console.error('Error checking operator status:', error);
+    console.error('Error checking admin status:', error);
     return ctx.reply('❌ Không thể kiểm tra quyền hạn. Vui lòng thử lại sau.');
   }
 };
