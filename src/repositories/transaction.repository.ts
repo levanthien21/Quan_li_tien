@@ -207,31 +207,32 @@ export class TransactionRepository
       where: { id: groupId },
     });
 
-    const [depositAgg, withdrawalAgg, adjustmentAgg, customerCount, transactionCount] = await Promise.all([
-      prisma.transaction.aggregate({
-        _sum: {
-          amountVnd: true,
-          netAmountVnd: true,
-          amountUsdt: true,
-        },
-        where: { groupId, type: 'DEPOSIT' },
-      }),
-      prisma.transaction.aggregate({
-        _sum: {
-          amountVnd: true,
-          amountUsdt: true,
-        },
-        where: { groupId, type: 'WITHDRAWAL' },
-      }),
-      prisma.transaction.aggregate({
-        _sum: {
-          amountUsdt: true,
-        },
-        where: { groupId, type: 'ADJUSTMENT' },
-      }),
-      prisma.groupCustomer.count({ where: { groupId } }),
-      prisma.transaction.count({ where: { groupId } }),
-    ]);
+    const depositAgg = await prisma.transaction.aggregate({
+      _sum: {
+        amountVnd: true,
+        netAmountVnd: true,
+        amountUsdt: true,
+      },
+      where: { groupId, type: 'DEPOSIT' },
+    });
+
+    const withdrawalAgg = await prisma.transaction.aggregate({
+      _sum: {
+        amountVnd: true,
+        amountUsdt: true,
+      },
+      where: { groupId, type: 'WITHDRAWAL' },
+    });
+
+    const adjustmentAgg = await prisma.transaction.aggregate({
+      _sum: {
+        amountUsdt: true,
+      },
+      where: { groupId, type: 'ADJUSTMENT' },
+    });
+
+    const customerCount = await prisma.groupCustomer.count({ where: { groupId } });
+    const transactionCount = await prisma.transaction.count({ where: { groupId } });
 
     const totalDepositVnd = new Decimal(depositAgg._sum.amountVnd?.toString() || '0');
     const totalNetDepositVnd = new Decimal(depositAgg._sum.netAmountVnd?.toString() || '0');

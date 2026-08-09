@@ -77,10 +77,8 @@ export function setupConfigCommands(
       }
 
       const groupId = BigInt(ctx.chat.id);
-      await Promise.all([
-        groupRepo.updateDepositRate(groupId, rate),
-        groupRepo.updateWithdrawRate(groupId, rate),
-      ]);
+      await groupRepo.updateDepositRate(groupId, rate);
+      await groupRepo.updateWithdrawRate(groupId, rate);
       return ctx.reply(`✅ Đã cập nhật tỷ giá chung: **${formatVndDisplay(rate)} VND/USDT**`, {
         parse_mode: 'Markdown',
       });

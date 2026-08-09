@@ -24,11 +24,9 @@ export class BalanceService {
    * Current USDT Balance = Total Net Deposit USDT - Total Withdrawal USDT + Total Adjustment USDT
    */
   async getCustomerBalanceUsdt(groupId: bigint, customerId: bigint): Promise<Decimal> {
-    const [netDepositSum, withdrawalSum, adjustmentSum] = await Promise.all([
-      this.repository.getNetDepositUsdtSum(groupId, customerId),
-      this.repository.getWithdrawalUsdtSum(groupId, customerId),
-      this.repository.getAdjustmentUsdtSum(groupId, customerId),
-    ]);
+    const netDepositSum = await this.repository.getNetDepositUsdtSum(groupId, customerId);
+    const withdrawalSum = await this.repository.getWithdrawalUsdtSum(groupId, customerId);
+    const adjustmentSum = await this.repository.getAdjustmentUsdtSum(groupId, customerId);
 
     // Current Balance = Net Deposit USDT - Withdrawal USDT + Adjustment USDT
     return netDepositSum.sub(withdrawalSum).add(adjustmentSum).toDecimalPlaces(6, Decimal.ROUND_HALF_UP);
