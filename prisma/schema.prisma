@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  ADJUSTMENT
+}
+
+model Operator {
+  id           String          @id @default(uuid())
+  telegramId   BigInt          @unique @map("telegram_id")
+  name         String
+  role         String          @default("OPERATOR")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  groups       TelegramGroup[]
+  transactions Transaction[]
+
+  @@map("operators")
+}
+
+model TelegramGroup {
+  id                     BigInt          @id @map("id")
+  title                  String?
+  operatorId             String?         @map("operator_id")
+  operator               Operator?       @relation(fields: [operatorId], references: [id])
+  defaultFeePercent      Decimal         @default(0) @db.Decimal(5, 2) @map("default_fee_percent")
+  depositExchangeRate    Decimal         @default(0) @db.Decimal(12, 2) @map("deposit_exchange_rate")
+  withdrawalExchangeRate Decimal         @default(0) @db.Decimal(12, 2) @map("withdrawal_exchange_rate")
+  feeIsSet               Boolean         @default(false) @map("fee_is_set")
+  isActive               Boolean         @default(true) @map("is_active")
+  createdAt              DateTime        @default(now()) @map("created_at")
+  updatedAt              DateTime        @updatedAt @map("updated_at")
+  groupCustomers         GroupCustomer[]
+  transactions           Transaction[]
+
+  @@map("telegram_groups")
+}
+
+model Customer {
+  id             BigInt          @id @map("id") // Telegram User ID
+  username       String?
+  firstName      String?         @map("first_name")
+  lastName       String?         @map("last_name")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  groupCustomers GroupCustomer[]
+  transactions   Transaction[]
+
+  @@map("customers")
+}
+
+model GroupCustomer {
+  id               String        @id @default(uuid())
+  groupId          BigInt        @map("group_id")
+  customerId       BigInt        @map("customer_id")
+  customFeePercent Decimal?      @db.Decimal(5, 2) @map("custom_fee_percent")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  group            TelegramGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  customer         Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, customerId])
+  @@map("group_customers")
+}
+
+model Transaction {
+  id                String          @id @default(uuid())
+  groupId           BigInt          @map("group_id")
+  customerId        BigInt          @map("customer_id")
+  operatorId        BigInt?         @map("operator_id")
+  operator          Operator?       @relation(fields: [operatorId], references: [telegramId])
+  type              TransactionType
+  amountVnd         Decimal         @db.Decimal(18, 2) @map("amount_vnd")
+  feePercent        Decimal         @db.Decimal(5, 2) @map("fee_percent")
+  feeAmountVnd      Decimal         @db.Decimal(18, 2) @map("fee_amount_vnd")
+  netAmountVnd      Decimal         @db.Decimal(18, 2) @map("net_amount_vnd")
+  exchangeRate      Decimal         @db.Decimal(12, 2) @map("exchange_rate")
+  amountUsdt        Decimal         @db.Decimal(18, 6) @map("amount_usdt")
+  telegramMessageId BigInt?         @map("telegram_message_id")
+  note              String?
+  createdAt         DateTime        @default(now()) @map("created_at")
+  group             TelegramGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  customer          Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, customerId])
+  @@index([groupId, type])
+  @@map("transactions")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  operatorId BigInt   @map("operator_id")
+  groupId    BigInt?  @map("group_id")
+  customerId BigInt?  @map("customer_id")
+  action     String
+  details    Json
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
